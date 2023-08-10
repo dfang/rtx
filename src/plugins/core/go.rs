@@ -101,6 +101,15 @@ impl GoPlugin {
         let tarball_url = format!("{}/{}", &*env::RTX_GO_DOWNLOAD_MIRROR, &filename);
         let tarball_path = tv.download_path().join(filename);
 
+        pr.set_message(format!(
+            "file {} exists, skipping download",
+            tarball_path.to_string_lossy()
+        ));
+        if tarball_path.exists() {
+            self.verify_tarball_checksum(&tarball_url, &tarball_path)?;
+            return Ok(tarball_path);
+        }
+
         pr.set_message(format!("downloading {}", &tarball_url));
         http.download_file(&tarball_url, &tarball_path)?;
 
